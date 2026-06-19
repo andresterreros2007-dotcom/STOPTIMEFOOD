@@ -1,0 +1,69 @@
+body{
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
+
+.login-container{
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 300px;
+}
+
+h2{
+    text-align: center;
+}
+
+.input-group{
+    position: relative;
+    margin-bottom: 20px;
+}
+
+input{
+    width: 100%;
+    padding: 10px;
+    padding-right: 40px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.toggle-password{
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+button{
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #4e73df;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover{
+    background: #2e59d9;
+}
+
+input{
+    width: 100%;
+    padding: 10px 40px 10px 10px; /* mejor control */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* 🔥 MUY IMPORTANTE */
+}
+
+
+  

@@ -1,0 +1,94 @@
+:root {
+    --bg: #ffffff;
+    --card-bg: #f7f9fa;
+    --text: #333333;
+    --accent: #e11d48; /* Color de ejemplo para STOPTIME */
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    margin: 0;
+    padding: 0;
+}
+
+/* Header y Logo */
+.main-header {
+    padding: 20px 40px;
+}
+
+.logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -1px; }
+.logo span { font-weight: 300; }
+
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+/* Título Central */
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-top: 50px;
+    font-weight: 500;
+}
+
+/* Contenedor de Tarjetas */
+.profiles-grid {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding: 40px;
+    flex-wrap: wrap;
+}
+
+/* Tarjeta Individual */
+.role-card {
+    background: var(--card-bg);
+    width: 200px;
+    padding: 30px 15px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.role-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    background: #eeeeee;
+}
+
+/* El círculo del avatar */
+.avatar-circle {
+    width: 110px;
+    height: 110px;
+    background: #ccc;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Estilo para la tarjeta "Añadir" */
+.add-role .avatar-circle.dashed {
+    background: transparent;
+    border: 2px dashed #bbb;
+    font-size: 2rem;
+    color: #888;
+}
+
+.role-card h3 {
+    margin: 10px 0 5px;
+    font-size: 1.1rem;
+}
+
+.role-card p {
+    font-size: 0.85rem;
+    color: #666;
+}

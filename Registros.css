@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap');
+
+:root {
+  --verde:      #1a6b4a;
+  --verde-mid:  #2d8f63;
+  --verde-soft: #e6f4ed;
+  --verde-borde:#b2d9c5;
+  --negro:      #0f1a13;
+  --gris:       #6b7a74;
+  --gris-borde: #dde3e0;
+  --blanco:     #ffffff;
+  --fondo:      #f5f7f5;
+  --rojo:       #c0392b;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+
+    background-image: url("hola.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+
+
+/* ── MARCA SUPERIOR ── */
+.marca {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--verde);
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.marca span { font-weight: 400; opacity: 0.6; }
+
+/* ── CARD ── */
+.main-container {
+  width: 50%;
+  max-width: 440px;
+}
+
+.form-card {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 14px;
+  padding: 20px 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── TÍTULO ── */
+.form-card h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--negro);
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.form-subtitle {
+  font-size: 0.82rem;
+  color: var(--gris);
+  margin-bottom: 28px;
+}
+
+/* ── SEPARADOR DE SECCIÓN ── */
+.form-section {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gris);
+  margin: 20px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+/* ── CAMPO ── */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.campo label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gris);
+}
+
+.campo input,
+.campo select {
+  padding: 10px 13px;
+  border: 1.5px solid var(--gris-borde);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  color: var(--negro);
+  background: #fafafa;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+}
+
+.campo select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7a74' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-color: #fafafa;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.campo input:focus,
+.campo select:focus {
+  outline: none;
+  border-color: var(--verde-mid);
+  box-shadow: 0 0 0 3px rgba(45,143,99,0.12);
+  background: var(--blanco);
+}
+
+.campo input.error { border-color: var(--rojo); }
+.campo input::placeholder { color: #c0cac5; }
+
+/* ── ICONO DENTRO DEL CAMPO ── */
+.campo-icon {
+  position: relative;
+}
+
+.campo-icon input {
+  padding-left: 38px;
+}
+
+.campo-icon .icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--gris);
+  pointer-events: none;
+}
+
+/* ── MOSTRAR CONTRASEÑA ── */
+.pwd-wrapper {
+  position: relative;
+}
+
+.pwd-wrapper input {
+  padding-right: 42px;
+}
+
+.toggle-pwd {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--gris);
+  font-size: 1rem;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.toggle-pwd:hover { color: var(--verde); }
+
+/* ── MENSAJE DE ERROR INLINE ── */
+.msg-error {
+  font-size: 0.72rem;
+  color: var(--rojo);
+  display: none;
+  margin-top: 2px;
+}
+
+.msg-error.visible { display: block; }
+
+/* ── DOS COLUMNAS ── */
+.fila-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── BOTÓN ── */
+.btn-submit {
+  background: var(--negro);
+  color: var(--blanco);
+  border: none;
+  padding: 13px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.01em;
+}
+
+.btn-submit:hover  { background: var(--negro); }
+.btn-submit:active { transform: scale(0.98); }
+
+/* ── FOOTER ── */
+.form-footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--gris);
+  margin-top: 20px;
+}
+
+.form-footer a {
+  color: var(--verde);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.form-footer a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .form-card { padding: 24px 18px; }
+  .fila-2    { grid-template-columns: 1fr; }
+}
