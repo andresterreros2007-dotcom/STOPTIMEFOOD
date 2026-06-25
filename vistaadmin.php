@@ -296,20 +296,20 @@
         async function cargarHistorialSesiones() {
             try {
                 const respuesta = await fetch("obtener_sesiones.php");
-                if (!respuesta.ok) throw new Error(Error: ${respuesta.status});
+                if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
                 const datos = await respuesta.json();
                 const tbody = document.getElementById("tabla-sesiones-body");
                 tbody.innerHTML = ""; 
 
                 if (datos.length === 0) {
-                    tbody.innerHTML = <tr><td colspan="4" class="vacio">No hay registros de ingresos recientes.</td></tr>;
+                    tbody.innerHTML = `<tr><td colspan="4" class="vacio">No hay registros de ingresos recientes.</td></tr>`;
                     return;
                 }
 
                 datos.forEach(item => {
                     const fila = document.createElement("tr");
                     const tipoUsuario = (item.usuario || '').trim().toLowerCase();
-                    let badgeHTML = tipoUsuario === 'admin' ? <span class="badge-admin">Administrador</span> : <span class="badge-alman">Almacenista</span>;
+                    let badgeHTML = tipoUsuario === 'admin' ? `<span class="badge-admin">Administrador</span>` : `<span class="badge-alman">Almacenista</span>`;
 
                     fila.innerHTML = `
                         <td style="font-weight: 500; color: var(--negro);">${item.nombre || 'Sin nombre'}</td>
@@ -321,21 +321,21 @@
                 });
             } catch (error) {
                 console.error(error);
-                document.getElementById("tabla-sesiones-body").innerHTML = <tr><td colspan="4" class="vacio" style="color: #c0392b;">Error de renderizado de auditoría.</td></tr>;
+                document.getElementById("tabla-sesiones-body").innerHTML = `<tr><td colspan="4" class="vacio" style="color: #c0392b;">Error de renderizado de auditoría.</td></tr>`;
             }
         }
 
         // Obtener inventario general del almacén
         async function cargarTablaInventario() {
             try {
-                const res = await fetch(${PHP_ALMACEN}?obtener=1);
-                if (!res.ok) throw new Error(Error: ${res.status});
+                const res = await fetch(`${PHP_ALMACEN}?obtener=1`);
+                if (!res.ok) throw new Error(`Error: ${res.status}`);
                 const productos = await res.json();
                 renderizarTablaInventario(productos);
                 generarHistorialNotificaciones(productos);
             } catch (err) {
                 console.error(err);
-                document.getElementById("tabla-inventario-body").innerHTML = <tr><td colspan="7" class="vacio" style="color: #c0392b;">Error al conectar con el servicio de inventario.</td></tr>;
+                document.getElementById("tabla-inventario-body").innerHTML = `<tr><td colspan="7" class="vacio" style="color: #c0392b;">Error al conectar con el servicio de inventario.</td></tr>`;
             }
         }
 
@@ -346,7 +346,7 @@
             tbody.innerHTML = "";
 
             if (productos.length === 0) {
-                tbody.innerHTML = <tr><td colspan="7" class="vacio">No hay productos registrados en el almacén.</td></tr>;
+                tbody.innerHTML = `<tr><td colspan="7" class="vacio">No hay productos registrados en el almacén.</td></tr>`;
                 return;
             }
 
@@ -469,7 +469,7 @@
             if (fechaVencEdit <= fechaElabEdit) {
                 Swal.fire("Error de fechas", "La fecha de vencimiento debe ser posterior a la de elaboración.", "warning"); return;
             }
-               
+            
             const datos = new FormData();
             datos.append("editar",      "1");
             datos.append("id",          id);
@@ -543,7 +543,7 @@
             });
 
             if (alertasEmitidas === 0) {
-                contenedor.innerHTML = <p class="vacio" style="color: #1a6b4a;">✔️ No hay alertas de vencimiento críticas activas en este momento.</p>;
+                contenedor.innerHTML = `<p class="vacio" style="color: #1a6b4a;">✔️ No hay alertas de vencimiento críticas activas en este momento.</p>`;
             }
         }
     </script>
