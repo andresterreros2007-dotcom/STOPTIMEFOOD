@@ -172,10 +172,12 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .input-group input {
-  width: 58px;
+  width: 100%;
+  min-width: 0;
   text-align: center;
   padding: 10px 3px;
 }
@@ -184,6 +186,7 @@ body {
   font-size: 1rem;
   color: #b0bab5;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 /* ── GRILLA DE FECHAS ── */
@@ -191,6 +194,11 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 14px;
+  min-width: 0;
+}
+
+.fila-fechas .demo-item {
+  min-width: 0;
 }
 
 /* ── BOTÓN PRINCIPAL ── */

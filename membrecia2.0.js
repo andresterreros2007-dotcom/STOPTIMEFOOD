@@ -233,6 +233,33 @@ document.getElementById("btn-guardar-edicion").addEventListener("click", async (
     if (fechaVencEdit <= fechaElabEdit) {
         Swal.fire("Error de fechas", "La fecha de vencimiento debe ser posterior a la fecha de elaboración.", "warning"); return;
     }
-   
+
     const datos = new FormData();
     datos.append("editar",      "1");
+    datos.append("id",          id);
+    datos.append("categoria",   cat);
+    datos.append("producto",    prod);
+    datos.append("diaingreso",  diaing);
+    datos.append("mesingreso",  mesing);
+    datos.append("anioingreso", anioing);
+    datos.append("diaelab",     diaelab);
+    datos.append("meselabo",    meselab);
+    datos.append("anioelab",    anioelab);
+    datos.append("diavenci",    diaven);
+    datos.append("mesvenci",    mesven);
+    datos.append("aniovenci",   anioven);
+
+    try {
+        const res  = await fetch(PHP, { method: "POST", body: datos });
+        const json = await res.json();
+        if (json.status === "ok") {
+            Swal.fire("Actualizado", "Producto modificado correctamente", "success");
+            document.getElementById("modal-editar").style.display = "none";
+            cargarTabla();
+        } else {
+            Swal.fire("Error", json.mensaje, "error");
+        }
+    } catch (err) {
+        Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+    }
+});
