@@ -288,13 +288,13 @@ body {
 }
 
 .modal-content {
-  background: var(--blanco);
-  border-radius: 12px;
-  padding: 28px;
-  width: 100%;
-  max-width: 520px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.2);
-  position: relative;
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 32px;
+    width: 95%;
+    max-width: 900px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    position: relative;
 }
 
 .modal-content h2 {
