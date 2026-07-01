@@ -1,7 +1,28 @@
-
 const PHP = "almacenista.php";
 
 document.addEventListener("DOMContentLoaded", cargarTabla);
+
+// ===================== FUNCIÓN AUXILIAR: VALIDACIÓN DE FECHAS =====================
+function validarFechas(dia, mes, anio, tipoNombre) {
+    const fecha = new Date(anio, mes - 1, dia);
+    if (fecha.getDate() != dia || fecha.getMonth() != mes - 1 || fecha.getFullYear() != anio) {
+        Swal.fire("Fecha inválida", `La fecha de ${tipoNombre} no existe`, "warning");
+        return null;
+    }
+    return fecha;
+}
+
+function verificarLogicaFechas(fIngreso, fElab, fVenc) {
+    if (fElab > fIngreso) {
+        Swal.fire("Error de fechas", "La fecha de elaboración no puede ser posterior a la fecha de ingreso.", "warning"); 
+        return false;
+    }
+    if (fVenc <= fElab) {
+        Swal.fire("Error de fechas", "La fecha de vencimiento debe ser posterior a la fecha de elaboración.", "warning"); 
+        return false;
+    }
+    return true;
+}
 
 // ===================== INSERTAR PRODUCTO =====================
 document.getElementById("form-producto").addEventListener("submit", async function (e) {
@@ -19,39 +40,20 @@ document.getElementById("form-producto").addEventListener("submit", async functi
     const mesVenci   = document.getElementById("mesVencimiento").value;
     const anioVenci  = document.getElementById("anioVencimiento").value;
 
-    if (!categoria || !producto) {
-        Swal.fire("Error", "Completa la categoría y el producto", "warning"); return;
-    }
-    if (!diaIngreso || !mesIngreso || !anioIngreso) {
-        Swal.fire("Error", "Completa la fecha de ingreso", "warning"); return;
-    }
-    if (!diaElab || !mesElab || !anioElab) {
-        Swal.fire("Error", "Completa la fecha de elaboración", "warning"); return;
-    }
-    if (!diaVenci || !mesVenci || !anioVenci) {
-        Swal.fire("Error", "Completa la fecha de vencimiento", "warning"); return;
+    if (!categoria || !producto || !diaIngreso || !mesIngreso || !anioIngreso || !diaElab || !mesElab || !anioElab || !diaVenci || !mesVenci || !anioVenci) {
+        Swal.fire("Error", "Completa todos los campos obligatorios", "warning"); return;
     }
 
-    // ===== VALIDACIÓN FECHAS INSERTAR =====
-    const fechaIngreso = new Date(anioIngreso, mesIngreso - 1, diaIngreso);
-    const fechaElab    = new Date(anioElab, mesElab - 1, diaElab);
-    const fechaVenc    = new Date(anioVenci, mesVenci - 1, diaVenci);
+    // Validar existencias de fechas individuales
+    const fIngreso = validarFechas(diaIngreso, mesIngreso, anioIngreso, "ingreso");
+    if (!fIngreso) return;
+    const fElab = validarFechas(diaElab, mesElab, anioElab, "elaboración");
+    if (!fElab) return;
+    const fVenc = validarFechas(diaVenci, mesVenci, anioVenci, "vencimiento");
+    if (!fVenc) return;
 
-    if (fechaIngreso.getDate() != diaIngreso || fechaIngreso.getMonth() != mesIngreso - 1 || fechaIngreso.getFullYear() != anioIngreso) {
-        Swal.fire("Fecha inválida", "La fecha de ingreso no existe", "warning"); return;
-    }
-    if (fechaElab.getDate() != diaElab || fechaElab.getMonth() != mesElab - 1 || fechaElab.getFullYear() != anioElab) {
-        Swal.fire("Fecha inválida", "La fecha de elaboración no existe", "warning"); return;
-    }
-    if (fechaVenc.getDate() != diaVenci || fechaVenc.getMonth() != mesVenci - 1 || fechaVenc.getFullYear() != anioVenci) {
-        Swal.fire("Fecha inválida", "La fecha de vencimiento no existe", "warning"); return;
-    }
-    if (fechaElab > fechaIngreso) {
-        Swal.fire("Error de fechas", "La fecha de elaboración no puede ser posterior a la fecha de ingreso.", "warning"); return;
-    }
-    if (fechaVenc <= fechaElab) {
-        Swal.fire("Error de fechas", "La fecha de vencimiento debe ser posterior a la fecha de elaboración.", "warning"); return;
-    }
+    // Validar coherencia lógica entre ellas
+    if (!verificarLogicaFechas(fIngreso, fElab, fVenc)) return;
 
     const datos = new FormData();
     datos.append("insertar",    "1");
@@ -108,31 +110,75 @@ function renderizarTabla(productos) {
     hoy.setHours(0, 0, 0, 0);
 
     productos.forEach(p => {
+
         const fechaVencDate = new Date(p.fecha_venc_raw);
         const diasRestantes = Math.ceil((fechaVencDate - hoy) / (1000 * 60 * 60 * 24));
 
+        // ===================== GENERAR ALERTAS =====================
+        if (diasRestantes < 0) {
+
+            dispararNotificacion(
+                p.id,
+                "Producto vencido",
+                `El producto "${p.producto}" venció el ${p.fecha_venc}.`
+            );
+
+        } else if (diasRestantes <= 7) {
+
+            dispararNotificacion(
+                p.id,
+                "Próximo a vencer",
+                `El producto "${p.producto}" vence el ${p.fecha_venc}.`
+            );
+
+        }
+        // ==========================================================
+
         let estiloVenc = "";
-        if (diasRestantes < 0)       estiloVenc = 'style="color:#c0392b;font-weight:600"'; // vencido
-        else if (diasRestantes <= 7) estiloVenc = 'style="color:#e67e22;font-weight:600"'; // por vencer
-        else                         estiloVenc = 'style="color:#1a6b4a"';                 // ok
+
+        if (diasRestantes < 0)
+            estiloVenc = 'style="color:#c0392b;font-weight:600"';
+        else if (diasRestantes <= 7)
+            estiloVenc = 'style="color:#e67e22;font-weight:600"';
+        else
+            estiloVenc = 'style="color:#1a6b4a"';
 
         const fila = document.createElement("tr");
+
         fila.innerHTML = `
             <td style="color:#6b7a74;font-size:0.8rem">#${p.id}</td>
             <td><span class="pill-cat">${p.categoria}</span></td>
-            <td style="font-weight:500">${p.producto}</td>
+            <td style="font-weight:500" class="prod-nombre"></td>
             <td style="color:#6b7a74">${p.fecha_ing}</td>
             <td style="color:#6b7a74">${p.fecha_elab}</td>
             <td ${estiloVenc}>${p.fecha_venc}</td>
             <td>
-                <button class="btn-action btn-edit" onclick="abrirModal('${p.id}','${p.categoria.replace(/'/g, "\\'")}','${p.producto.replace(/'/g, "\\'")}','${p.fecha_ing}','${p.fecha_elab}','${p.fecha_venc}')">✏️</button>
-                <button class="btn-action btn-delete" onclick="eliminarProducto(${p.id})">🗑️</button>
+                <button class="btn-action btn-edit">✏️</button>
+                <button class="btn-action btn-delete">🗑️</button>
             </td>
         `;
+
+        fila.querySelector(".prod-nombre").textContent = p.producto;
+
+        fila.querySelector(".btn-edit").addEventListener("click", () => {
+            abrirModal(
+                p.id,
+                p.categoria,
+                p.producto,
+                p.fecha_ing,
+                p.fecha_elab,
+                p.fecha_venc
+            );
+        });
+
+        fila.querySelector(".btn-delete").addEventListener("click", () => {
+            eliminarProducto(p.id);
+        });
+
         tbody.appendChild(fila);
+
     });
 }
-
 // ===================== ELIMINAR PRODUCTO =====================
 async function eliminarProducto(id) {
     const conf = await Swal.fire({
@@ -163,7 +209,7 @@ async function eliminarProducto(id) {
     }
 }
 
-// ===================== INTERFAZ MODAL (CUADRO SECUNDARIO) =====================
+// ===================== INTERFAZ MODAL =====================
 function abrirModal(id, cat, prod, fechaIng, fechaElab, fechaVenc) {
     const [diaI, mesI, anioI] = fechaIng.split("/");
     const [diaE, mesE, anioE] = fechaElab.split("/");
@@ -213,26 +259,16 @@ document.getElementById("btn-guardar-edicion").addEventListener("click", async (
         Swal.fire("Error", "Completa todos los campos", "warning"); return;
     }
 
-    // ===== VALIDACIÓN FECHAS EDICIÓN =====
-    const fechaIngresoEdit = new Date(anioing, mesing - 1, diaing);
-    const fechaElabEdit    = new Date(anioelab, meselab - 1, diaelab);
-    const fechaVencEdit    = new Date(anioven, mesven - 1, diaven);
+    // Validar existencias de fechas individuales (Reutilizando la función)
+    const fIngresoEdit = validarFechas(diaing, mesing, anioing, "ingreso");
+    if (!fIngresoEdit) return;
+    const fElabEdit = validarFechas(diaelab, meselab, anioelab, "elaboración");
+    if (!fElabEdit) return;
+    const fVencEdit = validarFechas(diaven, mesven, anioven, "vencimiento");
+    if (!fVencEdit) return;
 
-    if (fechaIngresoEdit.getDate() != diaing || fechaIngresoEdit.getMonth() != mesing - 1 || fechaIngresoEdit.getFullYear() != anioing) {
-        Swal.fire("Fecha inválida", "La fecha de ingreso no existe.", "warning"); return;
-    }
-    if (fechaElabEdit.getDate() != diaelab || fechaElabEdit.getMonth() != meselab - 1 || fechaElabEdit.getFullYear() != anioelab) {
-        Swal.fire("Fecha inválida", "La fecha de elaboración no existe.", "warning"); return;
-    }
-    if (fechaVencEdit.getDate() != diaven || fechaVencEdit.getMonth() != mesven - 1 || fechaVencEdit.getFullYear() != anioven) {
-        Swal.fire("Fecha inválida", "La fecha de vencimiento no existe.", "warning"); return;
-    }
-    if (fechaElabEdit > fechaIngresoEdit) {
-        Swal.fire("Error de fechas", "La fecha de elaboración no puede ser posterior a la fecha de ingreso.", "warning"); return;
-    }
-    if (fechaVencEdit <= fechaElabEdit) {
-        Swal.fire("Error de fechas", "La fecha de vencimiento debe ser posterior a la fecha de elaboración.", "warning"); return;
-    }
+    // Validar coherencia lógica
+    if (!verificarLogicaFechas(fIngresoEdit, fElabEdit, fVencEdit)) return;
 
     const datos = new FormData();
     datos.append("editar",      "1");
@@ -243,7 +279,7 @@ document.getElementById("btn-guardar-edicion").addEventListener("click", async (
     datos.append("mesingreso",  mesing);
     datos.append("anioingreso", anioing);
     datos.append("diaelab",     diaelab);
-    datos.append("meselabo",    meselab);
+    datos.append("meselabo",    meselab); // Mantiene coincidencia con el name original 'meselabo'
     datos.append("anioelab",    anioelab);
     datos.append("diavenci",    diaven);
     datos.append("mesvenci",    mesven);
@@ -263,3 +299,93 @@ document.getElementById("btn-guardar-edicion").addEventListener("click", async (
         Swal.fire("Error", "No se pudo conectar con el servidor", "error");
     }
 });
+// =========================================================================
+// =================== SISTEMA NATIVO DE NOTIFICACIONES ====================
+// =========================================================================
+
+// 1. Registrar el Service Worker al iniciar (Requisito para capturar clics en segundo plano)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('Service Worker registrado correctamente.', reg))
+    .catch(err => console.error('Error al registrar el Service Worker:', err));
+}
+// 2. Pide permiso para mostrar notificaciones
+document.addEventListener("DOMContentLoaded", () => {
+    cargarTabla();
+
+    if (Notification.permission !== "granted" &&
+        Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+});
+
+/**
+ * 3. Función global para enviar una notificación a la Base de Datos
+ * y dispararla inmediatamente a la bandeja de Windows.
+ * @param {string} tipo - Ej: 'Producto vencido', 'Próximo a vencer'
+ * @param {string} mensajeDetalle - Texto descriptivo de la notificación
+ */
+/**
+ * Envía la notificación a la BD y luego la muestra en Windows.
+ */
+async function dispararNotificacion(idProducto, tipo, mensajeDetalle) {
+
+    const datos = new FormData();
+    datos.append("accion", "crear_notificacion");
+    datos.append("id_producto", idProducto);
+    datos.append("tipo", tipo);
+    datos.append("mensaje", mensajeDetalle);
+
+    try {
+
+        const res = await fetch(PHP, {
+            method: "POST",
+            body: datos
+        });
+
+        const json = await res.json();
+
+        if (json.status !== "ok") {
+            console.error("Error al crear la notificación:", json.mensaje);
+            return;
+        }
+
+        // Si ya existe una pendiente no vuelve a mostrarla
+        if (json.duplicada) {
+            return;
+        }
+
+        if (!("Notification" in window)) {
+            return;
+        }
+
+        if (Notification.permission !== "granted") {
+            return;
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+
+        await reg.showNotification(
+            `STOP TIMEFOOD - ${tipo.toUpperCase()}`,
+            {
+                body: mensajeDetalle,
+                icon: "logo.png",
+                badge: "logo.png",
+                requireInteraction: true,
+                vibrate: [200,100,200],
+                actions: [
+                    {
+                        action: "aceptar",
+                        title: "Aceptar"
+                    }
+                ],
+                data: {
+                    id: json.id_notificacion
+                }
+            }
+        );
+
+    } catch (err) {
+        console.error("Error al procesar la notificación:", err);
+    }
+}

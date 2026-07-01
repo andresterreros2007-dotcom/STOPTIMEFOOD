@@ -213,11 +213,17 @@
                 <p style="color: var(--gris-texto); font-size: 0.82rem; margin-bottom: 20px;">
                     Notificaciones automáticas de alimentos que expiran en un plazo menor a 3 días o que ya se encuentran vencidos.
                 </p>
-                <div id="contenedor-notificaciones">
-                    <p class="vacio">No hay notificaciones recientes.</p>
-                </div>
-            </div>
-        </div>
+                <table>
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Contenido</th>
+            <th>Fecha y Hora</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-notificaciones-body"></tbody>
+</table>
 
         <button onclick="window.location.href='index.php?rol_real=Admin'" class="btn-submit" style="background: #222; margin-top: 10px;">
             Volver a la página principal
@@ -267,11 +273,12 @@
         const PHP_ALMACEN = "almacenista.php"; 
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Cargas paralelas iniciales
-            cargarHistorialSesiones();
-            cargarTablaInventario();
-
-            // Disparadores de cierre del cuadro secundario
+    // Cargas paralelas iniciales
+    cargarHistorialSesiones();
+    cargarTablaInventario();
+    cargarNotificaciones();
+           
+    // Disparadores de cierre del cuadro secundario
             const cerrarBtn = document.getElementById("cerrar-modal");
             if (cerrarBtn) cerrarBtn.addEventListener("click", () => document.getElementById("modal-editar").style.display = "none");
             
@@ -330,9 +337,8 @@
             try {
                 const res = await fetch(`${PHP_ALMACEN}?obtener=1`);
                 if (!res.ok) throw new Error(`Error: ${res.status}`);
-                const productos = await res.json();
-                renderizarTablaInventario(productos);
-                generarHistorialNotificaciones(productos);
+              const productos = await res.json();
+            renderizarTablaInventario(productos);  
             } catch (err) {
                 console.error(err);
                 document.getElementById("tabla-inventario-body").innerHTML = `<tr><td colspan="7" class="vacio" style="color: #c0392b;">Error al conectar con el servicio de inventario.</td></tr>`;
@@ -421,11 +427,11 @@
                 const res = await fetch(PHP_ALMACEN, { method: "POST", body: datos });
                 const json = await res.json();
                 if (json.status === "ok") {
-                    Swal.fire("Eliminado", "El producto fue removido con éxito.", "success");
-                    cargarTablaInventario();
-                } else {
-                    Swal.fire("Error", json.mensaje, "error");
-                }
+    Swal.fire("Eliminado", "El producto fue removido con éxito.", "success");
+
+    cargarTablaInventario();
+    cargarNotificaciones();
+}
             } catch (err) {
                 Swal.fire("Error", "No se pudo procesar la solicitud en el servidor", "error");
             }
@@ -488,64 +494,91 @@
             try {
                 const res  = await fetch(PHP_ALMACEN, { method: "POST", body: datos });
                 const json = await res.json();
-                if (json.status === "ok") {
-                    Swal.fire("Actualizado", "Registro modificado correctamente.", "success");
-                    document.getElementById("modal-editar").style.display = "none";
-                    cargarTablaInventario();
-                } else {
-                    Swal.fire("Error", json.mensaje, "error");
-                }
-            } catch (err) {
+               if (json.status === "ok") {
+    Swal.fire("Actualizado", "Registro modificado correctamente.", "success");
+    document.getElementById("modal-editar").style.display = "none";
+
+    cargarTablaInventario();
+    cargarNotificaciones();
+}
+           
+} catch (err) {
                 Swal.fire("Error", "No se pudo conectar con el servidor", "error");
             }
         }
 
-        // Pestaña 3: Generador automático de Alertas de Vencimiento
-        function generarHistorialNotificaciones(productos) {
-            const contenedor = document.getElementById("contenedor-notificaciones");
-            if (!contenedor) return;
-            contenedor.innerHTML = "";
+       // ===================== HISTORIAL DE NOTIFICACIONES =====================
+async function cargarNotificaciones() {
 
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            let alertasEmitidas = 0;
+    try {
 
-            productos.forEach(p => {
-                const fechaVencDate = new Date(p.fecha_venc_raw);
-                const diasRestantes = Math.ceil((fechaVencDate - hoy) / (1000 * 60 * 60 * 24));
-                let cardHTML = "";
+        const res = await fetch(PHP_ALMACEN + "?obtener_notificaciones=1");
+        const notificaciones = await res.json();
 
-                if (diasRestantes < 0) {
-                    alertasEmitidas++;
-                    cardHTML = `
-                        <div class="notif-card notif-critica">
-                            <div>
-                                <strong style="color: #c0392b;">🚨 CRÍTICO: Producto Vencido</strong>
-                                <p style="margin: 4px 0 0 0; font-size:0.88rem; color:#eee;">El artículo <strong>${p.producto}</strong> (#${p.id}) de la categoría <em>${p.categoria}</em> expiró el ${p.fecha_venc}.</p>
-                            </div>
-                            <span style="font-size: 0.8rem; color:#888;">Hace ${Math.abs(diasRestantes)} días</span>
-                        </div>`;
-                } else if (diasRestantes <= 3) {
-                    alertasEmitidas++;
-                    cardHTML = `
-                        <div class="notif-card notif-advertencia">
-                            <div>
-                                <strong style="color: #e67e22;">⚠️ ADVERTENCIA: Próximo a vencer</strong>
-                                <p style="margin: 4px 0 0 0; font-size:0.88rem; color:#eee;">El artículo <strong>${p.producto}</strong> (#${p.id}) está a punto de caducar. Vence el ${p.fecha_venc}.</p>
-                            </div>
-                            <span style="font-size: 0.8rem; color:#e67e22; font-weight:600;">Quedan ${diasRestantes} días</span>
-                        </div>`;
-                }
+        const tbody = document.getElementById("tabla-notificaciones-body");
+        tbody.innerHTML = "";
 
-                if (cardHTML !== "") {
-                    contenedor.insertAdjacentHTML("beforeend", cardHTML);
-                }
-            });
+        if (notificaciones.length === 0) {
 
-            if (alertasEmitidas === 0) {
-                contenedor.innerHTML = `<p class="vacio" style="color: #1a6b4a;">✔️ No hay alertas de vencimiento críticas activas en este momento.</p>`;
-            }
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="vacio">
+                        No existen notificaciones registradas.
+                    </td>
+                </tr>
+            `;
+
+            return;
         }
+
+        notificaciones.forEach(n => {
+
+            let colorTipo = "#ffffff";
+            let fondo = "";
+
+            // Color según el tipo
+            if (n.tipo.toLowerCase().includes("vencido")) {
+
+                colorTipo = "#c0392b";
+                fondo = "rgba(192,57,43,.12)";
+
+            } else if (n.tipo.toLowerCase().includes("próximo")) {
+
+                colorTipo = "#e67e22";
+                fondo = "rgba(230,126,34,.12)";
+
+            }
+
+            let colorEstado = "#e67e22";
+
+            if (n.estado.toLowerCase() === "aceptado") {
+                colorEstado = "#27ae60";
+            }
+
+            tbody.innerHTML += `
+                <tr style="background:${fondo};">
+                    <td style="color:${colorTipo};font-weight:bold;">
+                        ${n.tipo}
+                    </td>
+
+                    <td>${n.mensaje}</td>
+
+                    <td>${n.fecha_hora}</td>
+
+                    <td style="color:${colorEstado};font-weight:bold;">
+                        ${n.estado}
+                    </td>
+                </tr>
+            `;
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+}
     </script>
 </body>
 </html>
